@@ -12,13 +12,21 @@ class CardGen():
             if not n in self.data:
                 return n
 
+    def norm_genre(self, genre, artist):
+        return genre
+
+    def artist(self, artist):
+        return artist
+
     def add_card(self, ctype, url, data):
         if ctype == "album":
             if not self.album_in_cards(data["album"]):
                 nid = self.get_new_id()
                 self.data[nid] = {"ctype": "album",
                                                 "songs": [],
-                                                "name": data["album"]}
+                                                "name": data["album"],
+                                                "genre": self.norm_genre(data["genre"], data["artist"]),
+                                                "artist": self.norm_artist(data["artist"])}
             self.add_song(url, data)
 
     def album_in_cards(self, album):
@@ -51,9 +59,9 @@ class CardGen():
         """
         i=1
         for cid in self.data:
-            print ("%d: %s %s" % (i, self.data[cid]["ctype"], self.data[cid]["name"]))
+            print ("%d %s:%s %s" % (i, self.data[cid]["genre"], self.data[cid]["artist"], self.data[cid]["name"]))
             for s in self.data[cid]["songs"]:
-                print ("\t %s %s" % (str(s["data"]["originalTrackNumber"]), s["data"]["title"]))
+                print ("\t%s %s" % (str(s["data"]["originalTrackNumber"]), s["data"]["title"]))
             i += 1
 
 
