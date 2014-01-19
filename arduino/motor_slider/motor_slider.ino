@@ -73,7 +73,7 @@ void loop() {
   Serial.print(valb);
   Serial.print("\n");
   
-  motor.run(FORWARD); // Go forward for 0
+  gotox(0);
   delay(1000);
   for (i=0;i<8;i++){    
     gotox(i*100);
