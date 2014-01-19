@@ -36,12 +36,20 @@ class Card():
                                         )
                                         )
 
-    def draw_punch_line(self, number, holes=[0,0,0,0,0,0,0,0], radius = "1cm"):
+    def draw_punch_line(self, number, holes=0, radius = "1cm"):
         """ Draws a line of holes
 
         @param number: Number of the line. 8 lines, 0-7
-        @param holes: list of hole values where 0 is unpunched, 1 is punched. 8 values for 8 holes
+        @param holes: id that should be printed. Max. 255
         """
+
+        if (holes>255) or (holes < 0):
+            #error
+            return
+
+        hstr = bin(holes)[2:]
+        hstr = "0"*(8-len(hstr))+hstr
+        print (hstr)
 
         vsize = self.punchbox[1][1] - self.punchbox[0][1]
         hsize = self.punchbox[1][0] - self.punchbox[0][0]
@@ -50,7 +58,7 @@ class Card():
         y = self.punchbox[0][1] + self.offset[1] + vdist * (number + 1)
         for i in range (0,8):
             x = self.punchbox[0][0] + self.offset[0] + hdist * (i + 1)
-            if holes[i] == 1:
+            if hstr[i] == "1":
                 self.draw_hole((x,y), radius)
 
     def print_text(self, text, pos, pixel="12px", font="Arial"):
@@ -89,14 +97,15 @@ class Card():
 
         # Draw first hole
         #self.draw_hole((100,100))
-        self.draw_punch_line(0,[1,1,1,1,1,1,1,1])
-        self.draw_punch_line(1,[1,1,1,1,1,1,1,1])
-        self.draw_punch_line(2,[1,1,1,1,1,1,1,1])
-        self.draw_punch_line(3,[1,1,1,1,1,1,1,1])
-        self.draw_punch_line(4,[1,1,1,1,1,1,1,1])
-        self.draw_punch_line(5,[1,1,1,1,1,1,1,1])
-        self.draw_punch_line(6,[1,1,1,1,1,1,1,1])
-        self.draw_punch_line(7,[1,1,1,1,1,1,1,1])
+
+        self.draw_punch_line(0,55)
+        self.draw_punch_line(1,155)
+        self.draw_punch_line(2,2)
+        self.draw_punch_line(3,3)
+        self.draw_punch_line(4,4)
+        self.draw_punch_line(5,5)
+        self.draw_punch_line(6,6)
+        self.draw_punch_line(7,7)
 
         self.print_heading("Metal,  Metallica, S&M")
         self.print_playlist(["1","2","3","4","Enter Sandman","Nothing Else Matters", "Call of Ktulhu"])
