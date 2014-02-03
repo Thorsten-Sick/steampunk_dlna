@@ -1,33 +1,41 @@
-/* Analog Read to LED
- * ------------------ 
- *
- * turns on and off a light emitting diode(LED) connected to digital  
- * pin 13. The amount of time the LED will be on and off depends on
- * the value obtained by analogRead(). In the easiest case we connect
- * a potentiometer to analog pin 2.
- *
- * Created 1 December 2005
- * copyleft 2005 DojoDave <http://www.0j0.org>
- * http://arduino.berlios.de
- *
- */
-
 #include <AFMotor.h>
+#include <Servo.h> 
+
      
-AF_DCMotor motor(1, MOTOR12_1KHZ); // create motor #2, 64KHz pwm
+AF_DCMotor slider(1, MOTOR12_1KHZ); // create motor #2, 64KHz pwm
+AF_Stepper stepper(48, 2);  // 48 is right for this guy: http://www.tinkersoup.de/small-stepper-motor/a-664/
+
+Servo servo1;
+Servo servo2;
+
 
 int potPin = 2;    // select the input pin for the potentiometer
-int ledPin = 13;   // select the pin for the LED
+//int ledPin = 13;   // select the pin for the LED
 int valf = 0;       // variable to store the value coming from the sensor
 int valb = 0;       // variable to store the value coming from the sensor
 int val = 0;       // variable to store the value coming from the sensor
 
 void setup() {
-  pinMode(ledPin, OUTPUT);  // declare the ledPin as an OUTPUT
+  servo1.attach(10);
+  servo2.attach(9);
+  
+
   Serial.begin(9600);
-  motor.setSpeed(200); // set the speed to 200/255. If the speed is too slow, it does not move !
+  slider.setSpeed(200); // set the speed to 200/255. If the speed is too slow, it does not move !
+  stepper.setSpeed(10); // 10 rpm
+     
+  //stepper.step(10, FORWARD, SINGLE);
+  stepper.release();
+  delay(1000);
+  slider.run(RELEASE);
 }
 
+
+//Servo stuff
+/////////////
+
+// Slider stuff
+///////////////
 void gotox(int x){
 // Move m,otorized slider till it reaches the exact position.
 //   
@@ -39,46 +47,98 @@ val = analogRead(potPin);    // read the value from the sensor
 while (val < x-slack || val > x+slack)
 {
   if (x>val){
-    motor.run(BACKWARD); // turn it on going forward
+    slider.run(BACKWARD); // turn it on going forward
   }
   else if (x<val){
-    motor.run(FORWARD); // turn it on going forward
+    slider.run(FORWARD); // turn it on going forward
   }
   delay(1);
   val = analogRead(potPin);    // read the value from the sensor
 }
 
-motor.run(RELEASE);
+slider.run(RELEASE);
 
 }
 
-void loop() {
-  int i;
-  
+void slider_init(){
   Serial.print("tick");
-  motor.run(FORWARD); // turn it on going forward
+  slider.run(FORWARD); // turn it on going forward
   delay(1000);
   valf = analogRead(potPin);    // read the value from the sensor
-  motor.run(BACKWARD); // turn it on going forward
-  delay(1000);
+  slider.run(BACKWARD); // turn it on going forward
   valb = analogRead(potPin);    // read the value from the sensor
-  motor.run(RELEASE);
-  delay(1000);
-  //digitalWrite(ledPin, HIGH);  // turn the ledPin on
-  delay(10);                  // stop the program for some time
+  slider.run(RELEASE);
+  delay(10);
+  
   Serial.print("Val Forward ");
   Serial.print(valf);
   Serial.print("\n");
   Serial.print("Val Backward ");
   Serial.print(valb);
   Serial.print("\n");
-  
+}
+
+void slider_step(){
+  int i;
+
   gotox(0);
-  delay(1000);
   for (i=0;i<8;i++){    
     gotox(i*100);
-    delay(1000);
+    delay(100);
   }
-  //digitalWrite(ledPin, LOW);   // turn the ledPin off
   delay(10);                  // stop the program for some time
+}
+
+
+// Stepper stuff
+////////////////
+
+void move_stepper(int dir){
+  if (dir<0){
+    stepper.step(dir*-1, BACKWARD, SINGLE);
+  }
+  else{
+    stepper.step(dir, FORWARD, SINGLE);
+  }
+  stepper.release();
+}
+
+// Servo stuff
+//////////////
+
+void move_servo(int no, int pos){
+  if (no == 1){
+    servo1.write(pos);
+  }
+  if (no == 2){
+    servo2.write(pos);
+  }
+}
+
+// Loop
+///////
+void loop() {
+  int value;
+  int command;
+  
+  if (Serial.available() > 0) {
+    int command = Serial.read();
+
+    switch (command) {
+    case 'c':    // Clock, the stepper
+      value = Serial.parseInt();
+      move_stepper(value);
+      break;
+    case 'a':    // Servo a(1)
+      value = Serial.parseInt();
+      move_servo(1, value);
+      break;
+    case 'b':    // Servo b
+      value = Serial.parseInt();
+      move_servo(2, value);
+      break;
+    default:     
+      break;
+      }
+    }
 }
