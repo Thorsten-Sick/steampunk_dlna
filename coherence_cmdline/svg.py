@@ -85,8 +85,8 @@ class Card():
             y += offset
 
 
-    def generate(self):
-        self.svg_document = svgwrite.Drawing(filename = "test-svgwrite.svg",
+    def generate(self, card):
+        self.svg_document = svgwrite.Drawing(filename = card["filename"],
                                         size = (str(self.size[0])+"cm", str(self.size[1])+"cm"))
 
         # Draw punchbox
@@ -96,19 +96,27 @@ class Card():
         pysize = str(self.punchbox[1][1] - self.punchbox[0][1]) + "cm"
 
         # Draw first hole
+
+        line = 0
+        for i in card["ids"]:
+            self.draw_punch_line(line,i)
+            line += 1
+
         #self.draw_hole((100,100))
 
-        self.draw_punch_line(0,55)
-        self.draw_punch_line(1,155)
-        self.draw_punch_line(2,2)
-        self.draw_punch_line(3,3)
-        self.draw_punch_line(4,4)
-        self.draw_punch_line(5,5)
-        self.draw_punch_line(6,6)
-        self.draw_punch_line(7,7)
+        #self.draw_punch_line(0,55)
+        #self.draw_punch_line(1,155)
+        #self.draw_punch_line(2,2)
+        #self.draw_punch_line(3,3)
+        #self.draw_punch_line(4,4)
+        #self.draw_punch_line(5,5)
+        #self.draw_punch_line(6,6)
+        #self.draw_punch_line(7,7)
 
-        self.print_heading("Metal,  Metallica, S&M")
-        self.print_playlist(["1","2","3","4","Enter Sandman","Nothing Else Matters", "Call of Ktulhu"])
+        #self.print_heading("Metal,  Metallica, S&M")
+        self.print_heading("%s  %s  %s" % (card["genre"], card["artist"], card["album"]))
+        self.print_playlist(card["songs"])
+        #self.print_playlist(["1","2","3","4","Enter Sandman","Nothing Else Matters", "Call of Ktulhu"])
 
 
         print(self.svg_document.tostring())
@@ -116,5 +124,13 @@ class Card():
         self.svg_document.save()
 
 
+card = { "album":"S&M",
+         "artist":"Metallica",
+         "genre": "Metal",
+         "songs":["Enter Sandman","Nothing Else Matters", "Call of Kthulhu"],
+         "ids":[255,2,3,4,5,6,7,8],
+         "filename": "test-svgwrite.svg"
+}
+
 c = Card()
-c.generate()
+c.generate(card)
