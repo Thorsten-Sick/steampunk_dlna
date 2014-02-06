@@ -5,13 +5,13 @@ import svgwrite
 
 class Card():
 
-    def __init__(self, offset=(0,0), size=(105,148), lines = 8, punchbox=((50,90),(100,140))):
+    def __init__(self, offset=(0,0), size=(105,148), lines = 8, punchbox=((0,75),(100,140))):
         """ A Punchcard
 
         @param offset: Offset onsheet. That way I can print several cards on one sheet. Maybe later laser cut them
-        @param size: Size of the card itself. in cm
+        @param size: Size of the card itself. in mm
         @param lines: Number of lines of holes. Each one will be 8 holes wide. That is 8 Bytes total for 8 lines
-        @param punchbox: Coordinates for the box that contains the punch holes. In cm
+        @param punchbox: Coordinates for the box that contains the punch holes. In mm
         """
         self.size = size
         self.offset = offset
@@ -19,15 +19,15 @@ class Card():
         self.punchbox = punchbox
         self.svg_document = None
 
-    def draw_hole(self, center = (0,0), radius="1cm"):
+    def draw_hole(self, center = (0,0), radius="2mm"):
         """ Draw a hole at the center point (in cm)
 
-        @param center: center position in cm
+        @param center: center position in mm
         @param radius: Radius of the hole
         """
 
-        px1 = str(center[0]) + "cm"
-        py1 = str(center[1]) + "cm"
+        px1 = str(center[0]) + "mm"
+        py1 = str(center[1]) + "mm"
         self.svg_document.add(self.svg_document.circle(center = (px1, py1),
                                            r = radius,
                                            stroke_width = "1",
@@ -36,7 +36,7 @@ class Card():
                                         )
                                         )
 
-    def draw_punch_line(self, number, holes=0, radius = "1cm"):
+    def draw_punch_line(self, number, holes=0, radius = "2mm"):
         """ Draws a line of holes
 
         @param number: Number of the line. 8 lines, 0-7
@@ -66,34 +66,34 @@ class Card():
                                            insert = (pos[0], pos[1]),
                                            style = "font-size:%s; font-family:%s"%(pixel, font)))
 
-    def print_heading(self, text, pixel="144px", font="1942 report"):
+    def print_heading(self, text, pixel="20px", font="1942 report"):
         """ Print Heading
 
         """
-        self.print_text(text, ("2cm","4cm"), pixel, font)
+        self.print_text(text, ("5mm","10mm"), pixel, font)
 
 
-    def print_playlist(self, text, pixel="70px", font = "1942 report"):
+    def print_playlist(self, text, pixel="12px", font = "1942 report"):
         """ A list of strings printed at the left side of the card
 
         @param text: A list of strings. each item is a line.
         """
-        y = 20
+        y = 15
         offset = 3
         for line in text:
-            self.print_text(line, ("1cm", str(y) + "cm"), pixel=pixel, font = font)
+            self.print_text(line, ("10mm", str(y) + "mm"), pixel=pixel, font = font)
             y += offset
 
 
     def generate(self, card):
         self.svg_document = svgwrite.Drawing(filename = card["filename"],
-                                        size = (str(self.size[0])+"cm", str(self.size[1])+"cm"))
+                                        size = (str(self.size[0])+"mm", str(self.size[1])+"mm"))
 
         # Draw punchbox
-        px1 = str(self.offset[0] + self.punchbox[0][0]) + "cm"
-        py1 = str(self.offset[1] + self.punchbox[0][1]) + "cm"
-        pxsize = str(self.punchbox[1][0] - self.punchbox[0][0]) + "cm"
-        pysize = str(self.punchbox[1][1] - self.punchbox[0][1]) + "cm"
+        px1 = str(self.offset[0] + self.punchbox[0][0]) + "mm"
+        py1 = str(self.offset[1] + self.punchbox[0][1]) + "mm"
+        pxsize = str(self.punchbox[1][0] - self.punchbox[0][0]) + "mm"
+        pysize = str(self.punchbox[1][1] - self.punchbox[0][1]) + "mm"
 
         # Draw first hole
 
@@ -102,22 +102,8 @@ class Card():
             self.draw_punch_line(line,i)
             line += 1
 
-        #self.draw_hole((100,100))
-
-        #self.draw_punch_line(0,55)
-        #self.draw_punch_line(1,155)
-        #self.draw_punch_line(2,2)
-        #self.draw_punch_line(3,3)
-        #self.draw_punch_line(4,4)
-        #self.draw_punch_line(5,5)
-        #self.draw_punch_line(6,6)
-        #self.draw_punch_line(7,7)
-
-        #self.print_heading("Metal,  Metallica, S&M")
         self.print_heading("%s  %s  %s" % (card["genre"], card["artist"], card["album"]))
         self.print_playlist(card["songs"])
-        #self.print_playlist(["1","2","3","4","Enter Sandman","Nothing Else Matters", "Call of Ktulhu"])
-
 
         print(self.svg_document.tostring())
 
