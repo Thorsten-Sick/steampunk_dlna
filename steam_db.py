@@ -29,15 +29,19 @@ class Song():
         song = pyglet.media.load(os.path.join(self.collection_path, self.meta["Filename"]))
         song.play()
         pyglet.app.run()
+        # TODO: Test and play a song
 
 
     def from_data(self, data):
         """ Create a song from data
+
+        @param data: A dict in meta style
         """
         self.meta = data
 
     def from_file(self, filename):
         """ Generate entry from a mp3 file
+
         @param filename: The file name relative to the collection path
         """
 
@@ -67,12 +71,16 @@ class Song():
                 self.meta["Filename"] = filename
 
     def __str__(self):
+        """ Print the song
+        """
         res = ""
         for key in self.meta:
             res += "%s  %s \n" %(key, self.meta[key])
         return res
 
     def get_data(self):
+        """ Return the meta data
+        """
         return self.meta
 
 
@@ -81,6 +89,10 @@ class Playlist():
     """
 
     def __init__(self, album = None, pid = None):
+        """
+        @param pid: Playlist id
+        @param album: The album name as id. Collisions are possible !
+        """
         self.pid = pid
         self.album = album
         self.data = {"songs":[]}
@@ -94,17 +106,18 @@ class Playlist():
         """ Add a song
         """
         self.data["songs"].append(song)
+        # TODO Sort titles in album by Track number
 
     def load_from_data(self):
         """ Load from db file
         """
-
+        # TODO: Load a playlist from data
         pass
 
     def return_data(self):
         """ return data in playlist
         """
-
+        #TODO: return the data of the playlist
         pass
 
 class Playlists():
@@ -116,9 +129,13 @@ class Playlists():
     def load_from_file(self):
         """ Load playlists from json file
         """
+        # TODO add load file for playlist
         pass
 
     def save_to_file(self):
+        """ Save Playlist to json file
+        """
+        # TODO Add save file for playlist
         pass
 
     def get_playlist_by_id(self, pid):
@@ -144,6 +161,8 @@ class Playlists():
     def generate_new_id(self):
         """ Generate a new random, unused id
         """
+
+        # TODO: create track ID in 8 Byte style for punchcard holes
         r = random.randint(0,10000)
         while (self.get_playlist_by_id(r)):
             r = random.randint(0,10000)
@@ -162,6 +181,8 @@ class Playlists():
 
     def album_playlist_from_song_db(self, songdb):
         """ Take a song db and create all album playlists
+
+        @param songdb: The song database class. Albums will be extracted
         """
 
         for song in songdb.db:
@@ -197,6 +218,8 @@ class SongDB():
             self.db = self.load()
 
     def load(self):
+        """ Load song db from json file
+        """
         res = []
         with open(self.filename) as fh:
             data = json.load(fh)
@@ -211,8 +234,7 @@ class SongDB():
         return []
 
     def update_from_dir(self):
-        """
-        @param dirname: Base dir to read files from
+        """ Update the current database from MP3 files in the directory
         """
 
         for subdir, dirs, files in os.walk(self.basedir):
@@ -225,6 +247,8 @@ class SongDB():
         print (len(self.db))
 
     def save(self, filename=None):
+        """ Save playlist to json file
+        """
         if filename is None:
             filename = self.filename
         data = []
@@ -232,9 +256,6 @@ class SongDB():
             data.append(asong.get_data())
         with open(filename, "wt") as fh:
             json.dump(data, fh, indent = 4)
-        #print data
-
-
 
 if __name__ == "__main__":
     sdb = SongDB("test.json", "/home/thorsten/Musik", True)
