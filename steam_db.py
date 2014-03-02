@@ -31,7 +31,6 @@ class Song():
         pyglet.app.run()
         # TODO: Test and play a song
 
-
     def from_data(self, data):
         """ Create a song from data
 
@@ -127,7 +126,6 @@ class Playlist():
     def get_data(self):
         """ return data in playlist
         """
-        #TODO: Test return the data of the playlist
         res = {"album": self.data["album"],
                "pid": self.data["pid"],
                "songs": []}
@@ -139,7 +137,6 @@ class Playlist():
     def from_data(self, data):
         """ Generate a playlist from dumped data
         """
-        # TODO Test playlist loading
         self.data = {"album": data["album"],
                      "pid": data["pid"],
                      "songs":[]}
@@ -166,8 +163,6 @@ class Playlists():
 
         @param: Json db filename. If none, taken from the central object name
         """
-        # TODO Test add load file for playlists
-
         if filename is None:
             filename = self.filename
         with open(filename) as fh:
@@ -182,7 +177,6 @@ class Playlists():
 
         @param,filename: Filename for the playlist. If None it is taken from playlist central
         """
-        # TODO Test Add save file for playlist
         if filename is None:
             filename = self.filename
         sdata = []
