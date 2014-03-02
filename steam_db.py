@@ -10,6 +10,11 @@ import os
 import json
 import pyglet
 import random
+import time
+
+# TODO: Create a player class
+
+# TODO: Start using multi processing
 
 class Song():
     """ A single song
@@ -21,15 +26,34 @@ class Song():
         """
         self.collection_path = collection_path
         self.meta = {}
+        self.source = None
+        self.player = None
 
     def play(self):
         """ Play the song
         http://guzalexander.com/2012/08/17/playing-a-sound-with-python.html
         """
-        song = pyglet.media.load(os.path.join(self.collection_path, self.meta["Filename"]))
-        song.play()
+        self.source = pyglet.media.load(os.path.join(self.collection_path, self.meta["Filename"]))
+        self.player = pyglet.media.Player()
+        self.player.queue(self.source)
+        self.player.play()
+
         pyglet.app.run()
-        # TODO: Test and play a song
+        # on ubuntu install libavbin0
+
+    def stop(self):
+        """ Stop a Song
+        """
+        print ("Stopping")
+        if not self.player is None:
+            self.player.stop()
+
+    def pause(self):
+        """ Pause a Song
+        """
+        if not self.player is None:
+            self.player.pause()
+
 
     def from_data(self, data):
         """ Create a song from data
@@ -312,13 +336,23 @@ class SongDB():
         with open(filename, "wt") as fh:
             json.dump(data, fh, indent = 4)
 
+    def __str__(self):
+        res = ""
+        res += str(len(self.db))
+        return res
+
 if __name__ == "__main__":
-    #sdb = SongDB("/home/thorsten/Musik", "test.json", True)
+    sdb = SongDB("/home/thorsten/Musik", "test.json", False)
+    print (sdb)
+    song = sdb.db[0]
+    song.play()
+    time.sleep(2)
+    song.stop()
     #sdb.update_from_dir()
     #sdb.save()
     #sdb.cards()
-    p = Playlists("/home/thorsten/Musik", filename="playlist.json")
+    #p = Playlists("/home/thorsten/Musik", filename="playlist.json")
     #p.album_playlist_from_song_db(sdb)
-    p.load_from_file()
-    print(p)
+    #p.load_from_file()
+    #print(p)
     #p.save_to_file()
