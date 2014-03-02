@@ -88,14 +88,23 @@ class Playlist():
     """ A playlist of several songs
     """
 
-    def __init__(self, album = None, pid = None):
+    def __init__(self, collection_path, album = None, pid = None):
         """
+
+        @param collection_path: Path where the whole collection is stored
         @param pid: Playlist id
         @param album: The album name as id. Collisions are possible !
         """
+        self.collection_path = collection_path
         self.data = {"songs":[],
                      "album": album,
                      "pid": pid}
+
+    def get_pid(self):
+        """ Return Playlist ID
+
+        """
+        return self.data["pid"]
 
     def create_card(self):
         """ Create a card
@@ -135,18 +144,24 @@ class Playlist():
                      "pid": data["pid"],
                      "songs":[]}
         for s in data["songs"]:
-            news = Song()
+            news = Song(self.collection_path)
             news.from_data(s)
             self.add_song(news)
 
 class Playlists():
     """ All playlists available
     """
-    def __init__(self, filename = None):
+    def __init__(self, collection_path, filename = None):
+        """
+
+        @param collection_path: Path where the collection is stored
+        @param filename: Filename of the DB to store in
+        """
+        self.collection_path = collection_path
         self.playlists = {}   # id:playlist
         self.filename = filename
 
-    def load_from_file(self, filename):
+    def load_from_file(self, filename=None):
         """ Load playlists from json file
 
         @param: Json db filename. If none, taken from the central object name
@@ -158,9 +173,9 @@ class Playlists():
         with open(filename) as fh:
             data = json.load(fh)
             for pl in data:
-                newpl = Playlist()
+                newpl = Playlist(self.collection_path)
                 newpl.from_data(pl)
-                self.playlists.append(newpl)
+                self.playlists[newpl.get_pid()] = newpl
 
     def save_to_file(self, filename = None):
         """ Save Playlist to json file
@@ -243,10 +258,12 @@ class Playlists():
 class SongDB():
     """ A List of all songs
     """
-    def __init__(self, filename, basedir, new = False):
+    def __init__(self, basedir, filename, new = False):
         """
-        @param filename: The name of the json db
+
         @param basedir: The dir of the collection
+        @param filename: The name of the json db
+        @param new: Create new db vs load
         """
         self.filename = filename
         self.basedir = basedir
@@ -302,11 +319,12 @@ class SongDB():
             json.dump(data, fh, indent = 4)
 
 if __name__ == "__main__":
-    sdb = SongDB("test.json", "/home/thorsten/Musik", True)
-    sdb.update_from_dir()
+    #sdb = SongDB("/home/thorsten/Musik", "test.json", True)
+    #sdb.update_from_dir()
     #sdb.save()
     #sdb.cards()
-    p = Playlists("playlist.json")
-    p.album_playlist_from_song_db(sdb)
+    p = Playlists("/home/thorsten/Musik", filename="playlist.json")
+    #p.album_playlist_from_song_db(sdb)
+    p.load_from_file()
     print(p)
-    p.save_to_file()
+    #p.save_to_file()
