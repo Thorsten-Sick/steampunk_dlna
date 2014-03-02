@@ -93,13 +93,14 @@ class Playlist():
         @param pid: Playlist id
         @param album: The album name as id. Collisions are possible !
         """
-        self.pid = pid
-        self.album = album
-        self.data = {"songs":[]}
+        self.data = {"songs":[],
+                     "album": album,
+                     "pid": pid}
 
     def create_card(self):
         """ Create a card
         """
+        # Todo Create and print a card
         pass
 
     def add_song(self, song):
@@ -111,32 +112,69 @@ class Playlist():
     def load_from_data(self):
         """ Load from db file
         """
-        # TODO: Load a playlist from data
+        # TODO: Maybe ? Load a playlist from data
         pass
 
-    def return_data(self):
+    def get_data(self):
         """ return data in playlist
         """
-        #TODO: return the data of the playlist
-        pass
+        #TODO: Test return the data of the playlist
+        res = {"album": self.data["album"],
+               "pid": self.data["pid"],
+               "songs": []}
+
+        for song in self.data["songs"]:
+            res["songs"].append(song.get_data())
+        return res
+
+    def from_data(self, data):
+        """ Generate a playlist from dumped data
+        """
+        # TODO Test playlist loading
+        self.data = {"album": data["album"],
+                     "pid": data["pid"],
+                     "songs":[]}
+        for s in data["songs"]:
+            news = Song()
+            news.from_data(s)
+            self.add_song(news)
 
 class Playlists():
     """ All playlists available
     """
-    def __init__(self):
+    def __init__(self, filename = None):
         self.playlists = {}   # id:playlist
+        self.filename = filename
 
-    def load_from_file(self):
+    def load_from_file(self, filename):
         """ Load playlists from json file
-        """
-        # TODO add load file for playlist
-        pass
 
-    def save_to_file(self):
-        """ Save Playlist to json file
+        @param: Json db filename. If none, taken from the central object name
         """
-        # TODO Add save file for playlist
-        pass
+        # TODO Test add load file for playlists
+
+        if filename is None:
+            filename = self.filename
+        with open(filename) as fh:
+            data = json.load(fh)
+            for pl in data:
+                newpl = Playlist()
+                newpl.from_data(pl)
+                self.playlists.append(newpl)
+
+    def save_to_file(self, filename = None):
+        """ Save Playlist to json file
+
+        @param,filename: Filename for the playlist. If None it is taken from playlist central
+        """
+        # TODO Test Add save file for playlist
+        if filename is None:
+            filename = self.filename
+        sdata = []
+        for pl in self.playlists:
+            sdata.append(self.playlists[pl].get_data())
+        with open(filename, "wt") as fh:
+            json.dump(sdata, fh, indent = 4)
 
     def get_playlist_by_id(self, pid):
         """ Get a playlist by id
@@ -154,7 +192,7 @@ class Playlists():
         """
         for pid in self.playlists:
             pl = self.playlists[pid]
-            if pl.album == album:
+            if pl.data["album"] == album:
                 return pl
         return None
 
@@ -217,11 +255,15 @@ class SongDB():
         else:
             self.db = self.load()
 
-    def load(self):
+    def load(self, filename=None):
         """ Load song db from json file
+
+        @param filename: Filename for loading. If None it will be the central class filename
         """
         res = []
-        with open(self.filename) as fh:
+        if filename is None:
+            filename = self.filename
+        with open(filename) as fh:
             data = json.load(fh)
             for sdata in data:
                 s = Song(self.basedir)
@@ -248,6 +290,8 @@ class SongDB():
 
     def save(self, filename=None):
         """ Save playlist to json file
+
+        @param filename: Filename for the db. If None, it will be the central class name
         """
         if filename is None:
             filename = self.filename
@@ -262,6 +306,7 @@ if __name__ == "__main__":
     sdb.update_from_dir()
     #sdb.save()
     #sdb.cards()
-    p = Playlists()
+    p = Playlists("playlist.json")
     p.album_playlist_from_song_db(sdb)
     print(p)
+    p.save_to_file()
